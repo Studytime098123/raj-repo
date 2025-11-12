@@ -1,3 +1,18 @@
 curl -v -u "username:password" \
   --upload-file yourfile.zip \
   "http://<nexus-host>:8081/repository/<repo-name>/<path-in-repo>/sample/yourfile.zip"
+
+
+
+
+
+curl -v -u "username:password" \
+  -F "r=maven-brick-internal-dev_n3" \
+  -F "hasPom=false" \
+  -F "e=zip" \
+  -F "g=com.brick.fct.gsna.shared-lib" \
+  -F "a=gcp-jenkins-shared-library" \
+  -F "v=1.0.0" \
+  -F "p=zip" \
+  -F "file=@gcp-jenkins-shared-library.zip" \
+  "https://nexus306.systems.pink.brick:8081/nexus/service/local/artifact/maven/content"
