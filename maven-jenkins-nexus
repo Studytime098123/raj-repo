@@ -50,14 +50,20 @@ pipeline {
 
         stage('Download from Nexus Maven Repo') {
             steps {
-                sh '''
-                    echo "Downloading uploaded artifact..."
-                    DOWNLOAD_URL="${NEXUS_BASE_URL}/repository/${REPO_NAME}/com/jenkins/sharedlib/1.0.${BUILD_NUMBER}/sharedlib-1.0.${BUILD_NUMBER}.zip"
-                    echo "URL: $DOWNLOAD_URL"
+                withCredentials([usernamePassword(credentialsId: 'nexus-cred',
+                                                  usernameVariable: 'NEXUS_USER',
+                                                  passwordVariable: 'NEXUS_PASS')]) {
+                    sh '''
+                        echo "Downloading uploaded artifact..."
 
-                    curl -u admin:raj -O "$DOWNLOAD_URL"
-                    echo "Download complete."
-                '''
+                        DOWNLOAD_URL="${NEXUS_BASE_URL}/repository/${REPO_NAME}/com/jenkins/sharedlib/1.0.${BUILD_NUMBER}/sharedlib-1.0.${BUILD_NUMBER}.zip"
+                        echo "URL: $DOWNLOAD_URL"
+
+                        curl -u $NEXUS_USER:$NEXUS_PASS -O "$DOWNLOAD_URL"
+
+                        echo "Download complete."
+                    '''
+                }
             }
         }
 
@@ -68,7 +74,7 @@ pipeline {
                     unzip -o sharedlib-1.0.${BUILD_NUMBER}.zip -d extracted-lib
                     echo "Extraction finished."
                 '''
-                
+
                 script {
                     def mavenbuild1 = load "${env.WORKSPACE}/extracted-lib/vars/mavenbuild1.groovy"
                     mavenbuild1.call()
