@@ -1,0 +1,93 @@
+pipeline {
+    agent any
+
+    environment {
+        NEXUS_BASE_URL = "http://192.168.1.14:8081"
+        REPO_NAME = "jenkins-maven-repo"
+        GROUP_ID = "com.jenkins"
+        ARTIFACT_ID = "sharedlib"
+    }
+
+    stages {
+
+        stage('Clone Shared Library Repo') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Studytime098123/shared-lib.git'
+            }
+        }
+
+        stage('Package Shared Library') {
+            steps {
+                sh '''
+                    echo "Zipping Jenkins shared library..."
+                    zip -r shared-lib.zip vars/ resources/ src/ || zip -r shared-lib.zip *
+                    echo "ZIP archive created: shared-lib.zip"
+                '''
+            }
+        }
+
+        stage('Upload ZIP to Nexus Maven Repo') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'nexus-cred',
+                                                  usernameVariable: 'NEXUS_USER',
+                                                  passwordVariable: 'NEXUS_PASS')]) {
+                    sh '''
+                        echo "Uploading artifact to Maven repository..."
+
+                        curl -v -u $NEXUS_USER:$NEXUS_PASS \
+                          -X POST "${NEXUS_BASE_URL}/service/rest/v1/components?repository=${REPO_NAME}" \
+                          -F "maven2.groupId=${GROUP_ID}" \
+                          -F "maven2.artifactId=${ARTIFACT_ID}" \
+                          -F "maven2.version=1.0.${BUILD_NUMBER}" \
+                          -F "maven2.asset1=@shared-lib.zip" \
+                          -F "maven2.asset1.extension=zip"
+
+                        echo "Upload completed successfully."
+                    '''
+                }
+            }
+        }
+
+        stage('Download from Nexus Maven Repo') {
+            steps {
+                sh '''
+                    echo "Downloading uploaded artifact..."
+                    DOWNLOAD_URL="${NEXUS_BASE_URL}/repository/${REPO_NAME}/com/jenkins/sharedlib/1.0.${BUILD_NUMBER}/sharedlib-1.0.${BUILD_NUMBER}.zip"
+                    echo "URL: $DOWNLOAD_URL"
+
+                    curl -u admin:raj -O "$DOWNLOAD_URL"
+                    echo "Download complete."
+                '''
+            }
+        }
+
+        stage('Extract and Execute Shared Library') {
+            steps {
+                sh '''
+                    echo "Extracting downloaded ZIP..."
+                    unzip -o sharedlib-1.0.${BUILD_NUMBER}.zip -d extracted-lib
+                    echo "Extraction finished."
+                '''
+                
+                script {
+                    def mavenbuild1 = load "${env.WORKSPACE}/extracted-lib/vars/mavenbuild1.groovy"
+                    mavenbuild1.call()
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline successful: Upload, download, and execution complete."
+        }
+        failure {
+            echo "Pipeline failed — check error logs."
+        }
+        always {
+            echo "Cleaning up workspace..."
+            cleanWs(deleteDirs: true, notFailBuild: true)
+            echo "Workspace cleaned."
+        }
+    }
+}
