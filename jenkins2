@@ -9,9 +9,9 @@ pipeline {
 
         stage('Clone Shared Library Repo') {
             steps {
-                git branch: 'GSNA-60750',
+                git branch: 'branch-name',
                     credentialsId: 'YOUR_CORRECT_CREDENTIAL_ID',
-                    url: 'https://alm-github.systems.uk.hsbc/GSNA/gcp-jenkins-shared-library.git'
+                    url: 'https://dummy.git'
             }
         }
 
