@@ -18,6 +18,9 @@ git branch: 'dev', credentialsId: 'nexus-cred', url: 'https://github.com/Studyti
 
 
 
+curl -v -u "$NEXUS-CREDS" \
+  --upload-file /workspace/gcp-shared-lib.zip \
+  "https://your-nexus-url/repository/REPO/path/gcp-shared-lib.zip"
 
 
 
