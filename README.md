@@ -20,25 +20,7 @@ git branch: 'dev', credentialsId: 'nexus-cred', url: 'https://github.com/Studyti
 
 
 
-pipeline {
-    agent any
 
-    options {
-        skipDefaultCheckout(true)
-    }
-
-    stages {
-
-        stage('Clone Shared Library Repo') {
-            steps {
-                git branch: 'GSNA-60750',
-                    credentialsId: 'YOUR_CORRECT_CREDENTIAL_ID',
-                    url: 'https://alm-github.systems.uk.hsbc/GSNA/gcp-jenkins-shared-library.git'
-            }
-        }
-
-    }
-}
 
 
 
