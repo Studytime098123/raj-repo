@@ -17,3 +17,22 @@ pipeline {
 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+library(
+    identifier: 'code-pipeline-libs@master',
+    retriever: modernSCM([
+        $class: 'FileSystemSCM',
+        path: '/workspace/gcp-shared-lib-clone/workspace/gcp-shared-lib'
+    ])
+)
