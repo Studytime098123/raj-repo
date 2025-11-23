@@ -36,3 +36,33 @@ library(
         path: '/workspace/gcp-shared-lib-clone/workspace/gcp-shared-lib'
     ])
 )
+
+
+
+
+
+
+// Load environment variables from the local code-pipeline-libs library
+library identifier: 'code-pipeline-libs@master', retriever: modernSCM([
+    $class: 'FileSystemSCM',
+    path: '/workspace/gcp-shared-lib-clone/workspace/gcp-shared-lib'
+])
+
+def codePipelineLib = library identifier: 'code-pipeline-libs@master', retriever: modernSCM([
+    $class: 'FileSystemSCM',
+    path: '/workspace/gcp-shared-lib-clone/workspace/gcp-shared-lib'
+])
+
+libHelper = codePipelineLib.org.gsna.dependencies.Helper.new()
+
+env.JOB_NAME = 'GSNA/GCP/DEVOPS/DevOps/Deploy_Pipelines/Deploy_Environment'
+
+// Load Jenkins DevOps Utils from the same local library (adjust if needed)
+library identifier: "jenkins-devops-libs@master", retriever: modernSCM([
+    $class: 'FileSystemSCM',
+    path: '/workspace/gcp-shared-lib-clone/workspace/gcp-shared-lib'
+])
+
+setPipelineEnvVars()
+
+
